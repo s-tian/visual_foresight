@@ -1,5 +1,4 @@
 import tensorflow as tf
-from video_prediction.models import MultiSAVPVideoPredictionModel, SAVPVideoPredictionModel, IndepMultiSAVPVideoPredictionModel
 import json
 import os
 

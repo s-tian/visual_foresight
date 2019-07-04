@@ -1,5 +1,6 @@
 #based on Dockerfile from mujoco-py
-FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
+FROM nvidia/cuda:10.0-cudnn7-runtime-ubuntu16.04
+# FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
 
 
 RUN apt-get update -q \
@@ -49,15 +50,9 @@ RUN chmod +x /usr/local/bin/Xdummy
 # Workaround for https://bugs.launchpad.net/ubuntu/+source/nvidia-graphics-drivers-375/+bug/1674677
 COPY ./vendor/10_nvidia.json /usr/share/glvnd/egl_vendor.d/10_nvidia.json
 
-WORKDIR /
-RUN git clone https://github.com/febert/video_prediction-1.git
-WORKDIR /video_prediction-1
-RUN git checkout dev
-RUN git pull origin dev
-WORKDIR /
-RUN git clone https://github.com/SudeepDasari/visual_foresight.git
-WORKDIR /visual_foresight
-RUN pip install -r requirements.txt
-WORKDIR /
-RUN git clone https://github.com/anxie/meta_classifier.git
+#WORKDIR /
+#RUN git clone https://github.com/SudeepDasari/RoboNet.git
+#WORKDIR /RoboNet
+#RUN pip install -r requirements.txt
+
 

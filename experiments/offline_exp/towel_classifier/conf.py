@@ -2,9 +2,10 @@ from visual_mpc.video_prediction.setup_predictor import setup_predictor
 from visual_mpc.video_prediction.vpred_model_interface import VPred_Model_Interface
 from robonet.video_prediction.models.savp_model import SAVPVideoPredictionModel
 import robonet
+import os
 
 
-modeldir = '/home/sudeep/Documents/video_prediction/pretrained_models/mixed_datasets/towel_hard_objects/view0/'
+modeldir = os.environ['VMPC_DATA'] + '/video_prediction/pretrained_models/mixed_datasets/towel_hard_objects/view0/'
 
 configuration = {
 'pred_model': VPred_Model_Interface,

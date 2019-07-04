@@ -2,6 +2,7 @@ import numpy as np
 import os
 from visual_mpc.envs.offline_env import OfflineSawyerEnv
 from visual_mpc.agent.offline_agent import OfflineAgent
+import os
 from visual_mpc.policy.cem_controllers.samplers.folding_sampler import FoldingCEMSampler
 from visual_mpc.policy.cem_controllers.variants.classifier_controller import ClassifierController
 BASE_DIR = '/'.join(str.split(__file__, '/')[:-1])
@@ -18,7 +19,8 @@ agent = {'type' : OfflineAgent,
          'image_height': 48,
          'image_width': 64,
          'current_dir': current_dir,
-         'no_goal_def': True
+         'no_goal_def': True,
+         'start_goal_confs':os.environ['VMPC_DATA'] + '/classifier_data/towel_classifier_data/positives'
          }
 
 policy = {
@@ -30,8 +32,8 @@ policy = {
     # 'predictor_propagation': True,   # use the model get the designated pixel for the next step!
     'initial_std': 0.005,
     'initial_std_lift': 0.05,  # std dev. in xy
-    'classifier_conf_path': '/home/sudeep/Documents/control_embedding/experiments/towel_exp/base.json',
-    'classifier_restore_path': '/home/sudeep/Documents/control_embedding/experiments/towel_exp/base_model/model-10000',
+    'classifier_conf_path': os.environ['VMPC_EXP'] + '/towel_exp/base_model',
+    'classifier_restore_path': os.environ['VMPC_EXP'] + '/towel_exp/base_model',
     'classifier_batch_size': 50,
     'verbose_every_iter': True,
     'state_append': [0.41, 0.25, 0.166]
