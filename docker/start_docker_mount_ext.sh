@@ -5,6 +5,7 @@ nvidia-docker run  -v $VMPC_EXP/:/workspace/experiments \
                    -v $NAS_CODE/:/workspace/code \
                    -v /raid/:/raid \
                    -v /:/parent \
+                   -v /nfs:/nfs \
                    --name=vmpc_docker \
 -e VMPC_EXP=/workspace/experiments \
 -e VMPC_DATA=/workspace/data/vmpc_data \
