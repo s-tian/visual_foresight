@@ -14,7 +14,7 @@ env_params = {
 
 agent = {'type' : OfflineAgent,
          'env': (OfflineSawyerEnv, env_params),
-         'data_save_dir': BASE_DIR,
+         # 'data_save_dir': BASE_DIR,
          'T' : 15,  #number of commands per episodes (issued at control_rate / substeps HZ)
          'image_height': 48,
          'image_width': 64,
@@ -32,12 +32,11 @@ policy = {
     # 'predictor_propagation': True,   # use the model get the designated pixel for the next step!
     'initial_std': 0.005,
     'initial_std_lift': 0.05,  # std dev. in xy
-    'classifier_conf_path': os.environ['VMPC_EXP'] + '/towel_exp/base_model',
-    'classifier_restore_path': os.environ['VMPC_EXP'] + '/towel_exp/base_model',
+    'classifier_conf_path': os.environ['VMPC_EXP'] + '/classifier/towel_exp/base.json',
+    'classifier_restore_path': os.environ['VMPC_EXP'] + '/classifier/towel_exp/base_model/model-80000',
     'classifier_batch_size': 50,
     'verbose_every_iter': True,
-    'state_append': [0.41, 0.25, 0.166]
-    
+    # 'state_append': [0.41, 0.25, 0.166]
 }
 
 config = {

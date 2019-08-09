@@ -7,7 +7,7 @@ class OfflineSawyerEnv(BaseEnv):
     """
     def __init__(self, env_params_dict, reset_state=None):
         self._hp = self._default_hparams()
-        self._adim, self._sdim = 5, 5
+        self._adim, self._sdim = 4, 4
 
     def _default_hparams(self):
         default_dict = {}

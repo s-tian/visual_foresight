@@ -1,6 +1,6 @@
 from visual_mpc.policy.cem_controllers import CEMBaseController
 import imp
-import control_embedding
+from control_embedding.deploy_model import deploy_model
 import numpy as np
 from visual_mpc.video_prediction.pred_util import get_context, rollout_predictions
 from ..visualizer.construct_html import save_gifs, save_html, save_img, fill_template, img_entry_html
@@ -31,7 +31,7 @@ class ClassifierController(CEMBaseController):
         else: vpred_ngpu = ngpu
 
         self._predictor = net_conf['setup_predictor'](ag_params, net_conf, gpu_id, vpred_ngpu, self._logger)
-        self._scoring_func = control_embedding.deploy_simple_model(self._hp.classifier_conf_path, batch_size=self._hp.classifier_batch_size,
+        self._scoring_func = deploy_model(self._hp.classifier_conf_path, batch_size=self._hp.classifier_batch_size,
                                                                    restore_path=self._hp.classifier_restore_path,
                                                                    device_id=gpu_id + ngpu - 1)
 

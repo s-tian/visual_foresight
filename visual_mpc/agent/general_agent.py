@@ -72,7 +72,7 @@ class GeneralAgent(object):
             try:
                 agent_data, obs_dict, policy_outs = self.rollout(policy, i_trial, i_traj)
                 traj_ok = agent_data['traj_ok']
-            except Image_Exception, Environment_Exception:
+            except (Image_Exception, Environment_Exception):
                 traj_ok = False
 
         if not traj_ok:
