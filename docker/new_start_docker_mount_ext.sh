@@ -1,6 +1,6 @@
 # instructions for running this the first time:
 # pull the docker image from docker hub: run ` docker pull febert/recplan:latest `
-nvidia-docker run  -v $VMPC_EXP/:/workspace/experiments \
+docker run  -v $VMPC_EXP/:/workspace/experiments \
                    -v $VMPC_DATA/:/workspace/data/vmpc_data  \
                    -v $NAS_CODE/:/workspace/code \
                    -v /raid/:/raid \

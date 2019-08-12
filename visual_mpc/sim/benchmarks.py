@@ -13,7 +13,7 @@ def perform_benchmark(conf=None, iex=-1, gpu_id=None, ngpu=1):
     :param gpu_id:
     :return:
     """
-    result_dir = conf['result_dir']
+    log_dir = conf['log_dir']
 
     if conf != None:
         benchmark_name = 'parallel'
@@ -49,9 +49,9 @@ def perform_benchmark(conf=None, iex=-1, gpu_id=None, ngpu=1):
             datapath = conf['source_basedirs'][0].partition('pushing_data')[2]
             conf['source_basedirs'] = [os.environ['VMPC_DATA_DIR'] + datapath]
 
-    result_file = result_dir + '/results_{}to{}.txt'.format(conf['start_index'], conf['end_index'])
-    final_dist_pkl_file = result_dir + '/scores_{}to{}.pkl'.format(conf['start_index'], conf['end_index'])
-    if os.path.isfile(result_dir + '/result_file'):
+    result_file = log_dir + '/results_{}to{}.txt'.format(conf['start_index'], conf['end_index'])
+    final_dist_pkl_file = log_dir + '/scores_{}to{}.pkl'.format(conf['start_index'], conf['end_index'])
+    if os.path.isfile(log_dir + '/result_file'):
         raise ValueError("the file {} already exists!!".format(result_file))
 
     while i_traj <= nruns:
@@ -63,11 +63,11 @@ def perform_benchmark(conf=None, iex=-1, gpu_id=None, ngpu=1):
         print('run number ', i_traj)
         print('-------------------------------------------------------------------')
 
-        record_dir = result_dir + '/verbose/traj{0}'.format(i_traj)
-        if not os.path.exists(record_dir):
-            os.makedirs(record_dir)
+        traj_log_dir= log_dir + '/verbose/traj{0}'.format(i_traj)
+        if not os.path.exists(traj_log_dir):
+            os.makedirs(traj_log_dir)
 
-        sim.agent._hyperparams['record'] = record_dir
+        sim.agent._hyperparams['record'] = traj_log_dir
 
         agent_data = sim.take_sample(i_traj)
 

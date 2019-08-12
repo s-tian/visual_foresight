@@ -89,7 +89,7 @@ class GeneralAgentSaver:
                     s.add_sequence_entry(key_name, get_shape(policy_out[0][k]), get_dtype(policy_out[0][k]))
             s.save_manifest()
 
-    def save_traj(self, agent_data, obs, policy_out):
+    def save_traj(self, itr, agent_data, obs, policy_out):
         is_good = None
         if self._seperate_good:
             is_good = agent_data.pop('goal_reached')
@@ -126,11 +126,11 @@ class GeneralAgentSaver:
         traj = (meta_data_dict, sequence_data)
 
         if self._seperate_good and is_good:
-            self._good_saver.add_traj(traj)
+            self._good_saver.save_traj(traj)
         elif self._seperate_good:
-            self._bad_saver.add_traj(traj)
+            self._bad_saver.save_traj(traj)
         else:
-            self._saver.add_traj(traj)
+            self._saver.save_traj(traj)
 
     def flush(self):
         if self._seperate_good:

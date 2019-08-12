@@ -5,8 +5,7 @@ import os
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
-from recursive_planning.infra.datasets.save_util.record_saver import HDF5SaverBase
-from utils import AttrDict
+from visual_mpc.agent.utils.utils import AttrDict
 
 
 def pad_traj_timesteps(traj, max_num_actions):
@@ -55,6 +54,60 @@ def get_pad_mask(action_len, max_num_actions):
     return mask
 
 
+class HDF5SaverBase():
+    def __init__(self, save_dir, traj_per_file,
+                 offset=0, split=(0.90, 0.05, 0.05), split_train_val_test=True):
+
+        self.train_test_val_split = split
+        self.split_train_val_test = split_train_val_test
+        self.traj_per_file = traj_per_file
+        self.traj_lists = [[], [], []]   # train val test lists
+        self.save_dir = save_dir
+        self.traj_count = offset
+        # TODO make this create dataset_spec
+
+    def save_hdf5(self, traj_list, prefix):
+        savedir = self.save_dir + '/hdf5/{}'.format(prefix) if self.split_train_val_test else self.save_dir + '/hdf5'
+        if not os.path.exists(savedir):
+            os.makedirs(savedir)
+        self.traj_count += 1
+
+        with h5py.File(savedir + '/traj_{}to{}'.format((self.traj_count  - 1)*self.traj_per_file,
+                                                self.traj_count*self.traj_per_file) + '.h5', 'w') as F:
+
+            F['traj_per_file'] = self.traj_per_file
+            for i, traj in enumerate(traj_list):
+                key = 'traj{}'.format(i)
+
+                assert traj.images.dtype == np.uint8, 'image need to be uint8!'
+                for name, value in traj.items():
+                    F[key + '/' + name] = value
+
+    def make_traj(self):
+        raise NotImplementedError()
+
+    def save_traj(self):
+        raise NotImplementedError()
+
+    def _save_traj(self, traj):
+        draw = np.random.choice([0, 1, 2], 1, p=self.train_test_val_split)[0]
+        self.traj_lists[draw].append(traj)
+
+        for i, prefix in enumerate(['train', 'val', 'test']):
+            if len(self.traj_lists[i]) == self.traj_per_file:
+                self.save_hdf5(self.traj_lists[i], prefix)
+                self.traj_lists[i] = []
+
+    def make_dataset(self):
+        boundaries = np.cumsum(np.array(self.train_test_val_split) * len(self.filenames), 0).astype(int)
+
+        self.make_phase(self.filenames[:boundaries[0]], 'train')
+
+        self.make_phase(self.filenames[boundaries[0]:boundaries[1]], 'val')
+
+        self.make_phase(self.filenames[boundaries[1]:], 'test')
+
+
 class HDF5Saver(HDF5SaverBase):
     def __init__(self, save_dir, envparams, agentparams, traj_per_file,
                  offset=0, split=(0.90, 0.05, 0.05), split_train_val_test=True):
@@ -86,3 +139,5 @@ class HDF5Saver(HDF5SaverBase):
     def save_traj(self, itr, agent_data, obs, policy_out):
         traj = self.make_traj(obs, policy_out)
         self._save_traj(traj)
+
+

@@ -21,6 +21,7 @@ class BaseMujocoEnv(BaseEnv):
         self.cameras = ['cam{}'.format(i) for i in range(self._ncam)]
 
         self._last_obs = None
+        self._obs_history = []
         self._hp = _hp
 
         self._save_buffer = []

@@ -193,6 +193,7 @@ class BaseCartgripperEnv(BaseMujocoEnv):
 
         #clear our observations from last rollout
         self._last_obs = None
+        self._obs_history = []
 
         if self._read_reset_state is None:
             # create random starting poses for objects
@@ -272,10 +273,11 @@ class BaseCartgripperEnv(BaseMujocoEnv):
         else:
             obs['state'] = copy.deepcopy(self.sim.data.qpos[:self._sdim].squeeze())
 
-        if self._gripper_dim and self._previous_target_qpos[-1] < is_open_thresh:
-            obs['state'][self._gripper_dim] = -1
-        else:
-            obs['state'][self._gripper_dim] = 1
+        if self._gripper_dim:
+            if self._previous_target_qpos[-1] < is_open_thresh:
+                obs['state'][self._gripper_dim] = -1
+            else:
+                obs['state'][self._gripper_dim] = 1
 
         #report object poses
         obs['object_poses_full'] = np.zeros((self.num_objects, 7))
@@ -294,10 +296,13 @@ class BaseCartgripperEnv(BaseMujocoEnv):
 
         #copy non-image data for environment's use (if needed)
         self._last_obs = copy.deepcopy(obs)
+        self._obs_history.append(copy.deepcopy(obs))
 
         #get images
         obs['images'] = self.render()
         obs['obj_image_locations'] = self.get_desig_pix(self._frame_width, obj_poses=obs['object_poses_full'])
+
+        obs['env_done'] = False
 
         return obs
 

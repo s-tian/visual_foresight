@@ -39,7 +39,7 @@ def check_and_pop(dict, key):
         print('popping key: {}'.format(key))
 
 
-def main():
+def run_exp():
     parser = argparse.ArgumentParser(description='run simulation experiments')
     parser.add_argument('experiment', type=str, help='experiment name')
     parser.add_argument('--nworkers', type=int, help='use multiple threads or not', default=1)
@@ -71,7 +71,7 @@ def main():
 
     if args.nsplit != -1:
         assert args.isplit >= 0 and args.isplit < args.nsplit, "isplit should be in [0, nsplit-1]"
-       
+
         n_persplit = max((hyperparams['end_index'] + 1 - hyperparams['start_index']) / args.nsplit, 1)
         hyperparams['end_index'] = int((args.isplit + 1) * n_persplit + hyperparams['start_index'] - 1)
         hyperparams['start_index'] = int(args.isplit * n_persplit + hyperparams['start_index'])
@@ -86,6 +86,8 @@ def main():
         try:
             os.system("rm {}".format('/'.join(str.split(hyperparams['agent']['filename'], '/')[:-1]) + '/auto_gen/*'))
         except: pass
+
+
 
     if 'RESULT_DIR' in os.environ:
         if 'exp_name' in hyperparams:
@@ -190,4 +192,4 @@ def sorted_alphanumeric(l):
 
 
 if __name__ == '__main__':
-    main()
+    run_exp()
