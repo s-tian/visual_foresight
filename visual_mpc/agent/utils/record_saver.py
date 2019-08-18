@@ -61,6 +61,7 @@ class RecordSaver:
         self._traj_buffers = [[] for _ in range(3)]
         self._save_counters = [0 for _ in range(3)]
 
+        data_save_dir = data_save_dir + '/tfrecords'
         dirs_to_create = ['train', 'test', 'val']
 
         dirs_to_create = ['{}/{}'.format(data_save_dir, d) for d in dirs_to_create]

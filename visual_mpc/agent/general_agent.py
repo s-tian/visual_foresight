@@ -44,7 +44,8 @@ class GeneralAgent(object):
         self._demo_images = None
         self._reset_state = None
         self._is_robot = 'robot_name' in hyperparams['env'][1]
-        self._save_worker = start_file_worker()
+        if self._hp.use_save_thread:
+            self._save_worker = start_file_worker()
         self._setup_world(0)
 
     def override_defaults(self, config):
@@ -81,6 +82,7 @@ class GeneralAgent(object):
             'make_final_gif_pointoverlay':False,
             'gen_xml': (True, 1),  # whether to generate xml, and how often
             'start_goal_confs': None,
+            'use_save_thread':False
         }
         # add new params to parent params
         parent_params = HParams()
@@ -299,9 +301,10 @@ class GeneralAgent(object):
         self.gif_images_traj, self.traj_points = [], None
 
     def cleanup(self):
-        print('Cleaning up file saver....')
-        self._save_worker.put(None)
-        self._save_worker.join()
+        if self._hp.use_save_thread:
+            print('Cleaning up file saver....')
+            self._save_worker.put(None)
+            self._save_worker.join()
 
     @property
     def record_path(self):

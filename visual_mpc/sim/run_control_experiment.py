@@ -97,6 +97,7 @@ class ControlManager:
             if args.save_thread:
                 modconf['record_saver'] = record_queue
                 modconf['counter'] = counter
+                modconf['use_save_thread'] = True
             if logging_conf is not None:
                 modconf['logging_conf'] = logging_conf
             conflist.append(modconf)
