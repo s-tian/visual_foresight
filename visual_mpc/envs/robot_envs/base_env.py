@@ -10,6 +10,7 @@ from .util.user_interface import select_points
 from .util.topic_utils import IMTopic
 import logging
 import json
+import scipy.misc
 
 
 def pix_resize(pix, target_width, original_width):
@@ -28,7 +29,7 @@ class BaseRobotEnv(BaseEnv):
                 self._hp.start_state = value
             else:
                 self._hp.set_hparam(name, value)
-
+        self.savedir = None
         assert self._hp.action_space == 'xyz_yaw_gripper', "environment only supports xyz_yaw_gripper action spaces at the moment"
         logging.info('initializing environment for {}'.format(self._hp.robot_name))
         self._robot_name = self._hp.robot_name
@@ -75,7 +76,7 @@ class BaseRobotEnv(BaseEnv):
 
         self._start_pix, self._desig_pix, self._goal_pix = None, None, None
 
-        self._goto_closest_neutral(duration=5.)
+        self._goto_closest_neutral(duration=3)
 
     def _default_hparams(self):
         default_dict = {'robot_name': None,
@@ -134,6 +135,7 @@ class BaseRobotEnv(BaseEnv):
             action[:3] *= self._high_bound[:3] - self._low_bound[:3]
 
         target_qpos = np.clip(self._next_qpos(action), self._low_bound, self._high_bound)
+        logging.getLogger('robot_logger').debug('Target position: {}'.format(target_qpos))
 
         if np.linalg.norm(target_qpos - self._previous_target_qpos) < 1e-3:
             return self._get_obs()
@@ -211,7 +213,6 @@ class BaseRobotEnv(BaseEnv):
 
         self._last_obs = copy.deepcopy(obs)
         obs['images'] = self.render()
-        # TODO no need to return every timestep
         obs['high_bound'], obs['low_bound'] = copy.deepcopy(self._high_bound), copy.deepcopy(self._low_bound)
 
         if self._hp.opencv_tracking:
@@ -246,6 +247,9 @@ class BaseRobotEnv(BaseEnv):
                 save_worker.put(('mov', 'recording{}/{}_clip.mp4'.format(i_traj, name), b, 30))
 
     def _end_reset(self):
+        start_image = self.render()
+        if self.savedir is not None:
+            scipy.misc.imsave('{}/initial_image.jpg'.format(self.savedir), start_image[0])
         logging.getLogger('robot_logger').info('Finishing reset {}'.format(self._reset_counter))
         if self._hp.wait_during_resetend:
             _ = raw_input("PRESS ENTER TO CONINUE")
@@ -355,6 +359,8 @@ class BaseRobotEnv(BaseEnv):
 
         for recorder in self._cameras:
             stamp, image = recorder.get_image()
+            print("stamp:", stamp)
+            logging.getLogger('robot_logger').error("Checking for time difference:  Current time {} camera time {}".format(cur_time, stamp))
             if abs(stamp - cur_time) > 10 * self._obs_tol:    # no camera ping in half second => camera failure
                 logging.getLogger('robot_logger').error("DeSYNC - no ping in more than {} seconds!".format(10 * self._obs_tol))
                 raise Image_Exception
@@ -465,6 +471,19 @@ class BaseRobotEnv(BaseEnv):
                                      save_dir, n_desig=ntasks)
             self._desig_pix = copy.deepcopy(self._start_pix)
             return copy.deepcopy(self._goal_pix)
+
+    def get_goal_image(self, savedir):
+        self.savedir = savedir
+        self._goto_closest_neutral()
+        self._controller.open_gripper(True)
+
+        raw_input("hit enter when ready to take goal image")
+        goal_img = self.render()
+        self._goto_closest_neutral()
+        self._controller.open_gripper(True)
+        raw_input("hit enter when objects put back")
+        scipy.misc.imsave('{}/goal_image.jpg'.format(savedir), goal_img[0])
+        return goal_img
 
     def get_goal_pix(self, target_width):
         return pix_resize(self._goal_pix, target_width, self._width)

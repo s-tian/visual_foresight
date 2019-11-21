@@ -9,13 +9,19 @@ from visual_mpc.policy.cem_controllers.samplers import CorrelatedNoiseSampler
 
 BASE_DIR = '/'.join(str.split(__file__, '/')[:-1])
 
-
 env_params = {
+    #'email_login_creds': '.email_cred',
     'camera_topics': [IMTopic('/front/image_raw')],
-    'robot_type': 'baxter',
-    'gripper_attached': 'baxter_gripper',
+                      # IMTopic('/left/image_raw')],
+                      # IMTopic('/right_side/image_raw')],
+                      # IMTopic('/left_side/image_raw')],
+                      # IMTopic('/right/image_raw')],
+    'robot_name':'franka',
+    'robot_type':'franka',
+    'gripper_attached':'hand',
     'cleanup_rate': -1,
     'duration': 3.5,
+    'reopen':False,
     'save_video': True
 }
 
@@ -31,20 +37,25 @@ agent = {'type' : BenchmarkAgent,
 policy = {
     'type': PixelCostController,
     'verbose_every_iter': True,
-    'replan_interval': 13,
-    'num_samples': 600,
-    'start_planning': 2,
-    'selection_frac': 2./3,
-    'predictor_propagation': True,   # use the model get the designated pixel for the next step!
-    'nactions': 13,
+    'zeros_for_start_frames':False,
+    'replan_interval': 10,
+    # 'num_samples': 200,
+    'start_planning': 5,
+    'iterations':5,
+    'selection_frac': 1./10,
+    # 'predictor_propagation': True,   # use the model get the designated pixel for the next step!
+    'nactions': 10,
 
-    "model_path": "~/models/train_baxterout_baxter_finetune/household/checkpoint_70000/",
+    # "model_path": "~/models/franka_sanity/sanity_check_model/checkpoint_415000/", # 8K
+     # "model_path": "/home/panda1/models/checkpoint_145000/", # 400
+          "model_path": "/home/panda1/models/ag_franka/VPredTrainable_0_462f7842_2019-10-05_00-03-46poiv7dyy/checkpoint_75000/", # Fineture
+
 
     "sampler": CorrelatedNoiseSampler
 }
 
 config = {
-    'experiment_name': 'baxter_fine_tune_household',
+    'experiment_name': 'franka_sanity_check',
     'traj_per_file':128,
     'save_data': True,
     'save_raw_images' : True,

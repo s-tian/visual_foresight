@@ -5,15 +5,17 @@ from visual_mpc.envs.robot_envs.autograsp_env import AutograspEnv
 from visual_mpc.policy.cem_controllers.pixel_cost_controller import PixelCostController
 from visual_mpc.envs.robot_envs.util.topic_utils import IMTopic
 from visual_mpc.policy.cem_controllers.samplers import CorrelatedNoiseSampler
-
+from visual_mpc.policy.inverse_models.inverse_model_base_controller import InvModelBaseController
 
 BASE_DIR = '/'.join(str.split(__file__, '/')[:-1])
 
 
 env_params = {
+    #'email_login_creds': '.email_cred',
     'camera_topics': [IMTopic('/front/image_raw')],
-    'robot_type': 'baxter',
-    'gripper_attached': 'baxter_gripper',
+    'robot_name':'franka',
+    'robot_type':'franka',
+    'gripper_attached':'hand',
     'cleanup_rate': -1,
     'duration': 3.5,
     'save_video': True
@@ -21,30 +23,25 @@ env_params = {
 
 agent = {'type' : BenchmarkAgent,
          'env': (AutograspEnv, env_params),
-         'data_save_dir': BASE_DIR,
          'T': 15,  #number of commands per episodes (issued at control_rate / substeps HZ)
-         'image_height': 48,
-         'image_width': 64,
-         'make_final_recording': ''
+         'image_height': 192,
+         'image_width': 256,
+         'make_final_recording': '',
+         'goal_image_only':'',
+         'no_goal_def':'',
+	     'data_save_dir': BASE_DIR
 }
 
 policy = {
-    'type': PixelCostController,
-    'verbose_every_iter': True,
-    'replan_interval': 13,
-    'num_samples': 600,
-    'start_planning': 2,
-    'selection_frac': 2./3,
-    'predictor_propagation': True,   # use the model get the designated pixel for the next step!
-    'nactions': 13,
+    'type': InvModelBaseController,
+        "model_params_path": "/home/panda1/models/bigger_multibot",
+        "model_restore_path":  "/home/panda1/models/bigger_multibot",
 
-    "model_path": "~/models/train_baxterout_baxter_finetune/household/checkpoint_70000/",
 
-    "sampler": CorrelatedNoiseSampler
 }
 
 config = {
-    'experiment_name': 'baxter_fine_tune_household',
+    "experiment_name": "inverse-model-onestep-replan-10",
     'traj_per_file':128,
     'save_data': True,
     'save_raw_images' : True,

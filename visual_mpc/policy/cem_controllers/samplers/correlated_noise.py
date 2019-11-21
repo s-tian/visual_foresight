@@ -69,7 +69,7 @@ class CorrelatedNoiseSampler(CEMSampler):
         hparams_dict = {
             'nactions': 15,
             'initial_std': [0.05, 0.05, 0.2, np.pi / 10],
-            'mean_bias': np.zeros(4),
+            'mean_bias': None,
             'kappa': 1,
             'beta_0': 0.5,
             'beta_1': 0.5,
