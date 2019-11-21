@@ -18,9 +18,7 @@ class Sim(object):
         self.override_defaults(config)
         self._hp.agent['log_dir'] = self._hp.log_dir
         self.agent = self._hp.agent['type'](self._hp.agent)
-        self.agentparams = self._hp.agent
-
-        self.policy = self._hp.policy['type'](self.agent._hp, self._hp.policy, gpu_id, ngpu)
+        self.policy = self._hp.policy['type'](self.agent._hp.values(), self._hp.policy, gpu_id, ngpu)
 
         self._record_queue = self._hp.record_saver
         self._counter = self._hp.counter
