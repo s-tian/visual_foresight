@@ -14,7 +14,7 @@ class SamplerPolicy(Policy):
         self._override_defaults(policyparams)
         self.agentparams = agentparams
         self.adim = len(self._hp.initial_std)
-        self._hp.nactions = agentparams.T
+        self._hp.nactions = agentparams['T']
         self._sampler = self._hp.sampler(self._hp, self.adim, None)
         self._actions = None
 

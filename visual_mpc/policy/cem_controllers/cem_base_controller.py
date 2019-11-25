@@ -112,7 +112,6 @@ class CEMBaseController(Policy):
                 
                 actions = self._sampler.sample_next_actions(self._hp.num_samples, re_sample_act, scores[self._best_indices].copy())
 
-      
         self._t_since_replan = 0
 
     def evaluate_rollouts(self, actions, cem_itr):
