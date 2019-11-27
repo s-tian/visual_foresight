@@ -17,11 +17,12 @@ class BenchmarkAgent(GeneralAgent):
         GeneralAgent.__init__(self, hyperparams)
 
         if not self._is_robot:
-            self._hyperparams['gen_xml'] = 1
+            self._hp.gen_xml = (True, 1)
 
     def _post_process_obs(self, env_obs, agent_data, initial_obs=False):
         obs = super(BenchmarkAgent, self)._post_process_obs(env_obs, agent_data, initial_obs)
-        agent_data['verbose_worker'] = self._save_worker
+        if self._hp.use_save_thread:
+            agent_data['verbose_worker'] = self._save_worker
         return obs
 
     def _setup_world(self, itr):
@@ -33,10 +34,10 @@ class BenchmarkAgent(GeneralAgent):
 
     def _required_rollout_metadata(self, agent_data, traj_ok, t, i_traj, i_itr, reset_state):
         GeneralAgent._required_rollout_metadata(self, agent_data, traj_ok, t, i_traj, i_itr, reset_state)
-        point_target_width = self._hyperparams.get('point_space_width', self._hyperparams['image_width'])
-        ntasks = self._hyperparams.get('ntask', 1)
-        if 'no_goal_def' not in self._hyperparams:
-            agent_data['stats'] = self.env.eval(point_target_width, self._hyperparams.get('_bench_save', None), ntasks)
+        point_target_width = self._hp.get('point_space_width', self._hp['image_width'])
+        ntasks = self._hp.get('ntask', 1)
+        if 'no_goal_def' not in self._hp:
+            agent_data['stats'] = self.env.eval(point_target_width, self._hp.get('_bench_save', None), ntasks)
 
         if not traj_ok and self._is_robot:
             """
@@ -48,47 +49,47 @@ class BenchmarkAgent(GeneralAgent):
 
     def _init(self):
         if self._is_robot:
-            if '_bench_save' not in self._hyperparams:
+            if '_bench_save' not in self._hp:
                 raise ValueError("Benchmark dir missing! Maybe you didn't add --benchmark flag?")
 
             done = False
             while not done:
-                if os.path.exists(self._hyperparams['_bench_save']):
-                    shutil.rmtree(self._hyperparams['_bench_save'])
-                os.makedirs(self._hyperparams['_bench_save'])
+                if os.path.exists(self._hp._bench_save):
+                    shutil.rmtree(self._hp._bench_save)
+                os.makedirs(self._hp._bench_save)
 
-                ntasks = self._hyperparams.get('ntask', 1)
+                ntasks = self._hp.get('ntask', 1)
 
-                if 'no_goal_def' not in self._hyperparams:
-                    if 'register_gtruth' in self._hyperparams and len(self._hyperparams['register_gtruth']) == 2:
-                        raw_goal_image, self._goal_obj_pose = self.env.get_obj_desig_goal(self._hyperparams['_bench_save'], True,
+                if 'no_goal_def' not in self._hp:
+                    if 'register_gtruth' in self._hp and len(self._hp.register_gtruth) == 2:
+                        raw_goal_image, self._goal_obj_pose = self.env.get_obj_desig_goal(self._hp._bench_save, True,
                                                                                            ntasks=ntasks)
-                        goal_dims = (1, self.ncam, self._hyperparams['image_height'], self._hyperparams['image_width'], 3)
+                        goal_dims = (1, self.ncam, self._hp.image_height, self._hp.image_width, 3)
                         self._goal_image = np.zeros(goal_dims, dtype=np.uint8)
                         resize_store(0, self._goal_image, raw_goal_image)
                         self._goal_image = self._goal_image.astype(np.float32) / 255.
                     else:
-                        self._goal_obj_pose = self.env.get_obj_desig_goal(self._hyperparams['_bench_save'], ntasks=ntasks)
+                        self._goal_obj_pose = self.env.get_obj_desig_goal(self._hp._bench_save, ntasks=ntasks)
                 else:
-                    if 'goal_image_only' in self._hyperparams:
-                        raw_goal_image = self.env.get_goal_image(self._hyperparams['_bench_save'])
-                        goal_dims = (1, self.ncam, self._hyperparams['image_height'], self._hyperparams['image_width'], 3)
+                    if 'goal_image_only' in self._hp:
+                        raw_goal_image = self.env.get_goal_image(self._hp._bench_save)
+                        goal_dims = (1, self.ncam, self._hp.image_height, self._hp.image_width, 3)
                         self._goal_image = np.zeros(goal_dims, dtype=np.uint8)
                         resize_store(0, self._goal_image, raw_goal_image)
                         self._goal_image = self._goal_image.astype(np.float32) / 255.
-                    elif 'load_goal_image' in self._hyperparams:
+                    elif 'load_goal_image' in self._hp:
                         import scipy
-                        im = scipy.misc.imread(self._hyperparams['load_goal_image'])
-                        goal_dims = (1, self.ncam, self._hyperparams['image_height'], self._hyperparams['image_width'], 3)
+                        im = scipy.misc.imread(self._hp.load_goal_image)
+                        goal_dims = (1, self.ncam, self._hp.image_height, self._hp.image_width, 3)
                         self._goal_image = np.zeros(goal_dims, dtype=np.uint8)
                         resize_store(0, self._goal_image, im[None])
                         self._goal_image = self._goal_image.astype(np.float32) / 255.
                     else:
                         raise NotImplementedError
 
-                if 'no_goal_def' in self._hyperparams or 'y' in raw_input('Is definition okay? (y/n):'):
+                if 'no_goal_def' in self._hp or 'y' in raw_input('Is definition okay? (y/n):'):
                     done = True
-                    self._save_worker.put(('path', self._hyperparams['_bench_save']))
+                    self._save_worker.put(('path', self._hp._bench_save))
 
             return GeneralAgent._init(self)
 
@@ -104,7 +105,7 @@ class BenchmarkAgent(GeneralAgent):
         if self._is_robot:   # robot experiments don't have a reset state
             return None
 
-        itr = self._hyperparams.get('iex', itr)
+        itr = self._hp.get('iex', itr)
 
         ngroup = 1000
         igrp = itr // ngroup
@@ -112,10 +113,10 @@ class BenchmarkAgent(GeneralAgent):
         traj_folder = group_folder + '/traj{}'.format(itr)
 
         print('reading from: ', traj_folder)
-        num_images = self._hyperparams.get('num_load_steps', 2)
+        num_images = self._hp.num_load_steps
 
         obs_dict = {}
-        goal_images = np.zeros([num_images, self.ncam, self._hyperparams['image_height'], self._hyperparams['image_width'], 3])
+        goal_images = np.zeros([num_images, self.ncam, self._hp.image_height, self._hp.image_width, 3])
         for t in range(num_images):  #TODO detect number of images automatically in folder
             for i in range(self.ncam):
                 image_file = '{}/images{}/im_{}.png'.format(traj_folder, i, t)
@@ -129,18 +130,20 @@ class BenchmarkAgent(GeneralAgent):
             agent_data = pkl.load(file)
         with open('{}/obs_dict.pkl'.format(traj_folder), 'rb') as file:
             obs_dict.update(pkl.load(file))
+
         reset_state = agent_data['reset_state']
 
         self._goal_obj_pose = obs_dict['object_qpos'][-1]
 
-        verbose_dir = '{}/verbose/traj_{}'.format(self._hyperparams['data_save_dir'], itr)
-        self._save_worker.put(('path', verbose_dir))
+        verbose_dir = '{}/verbose/traj_{}'.format(self._hp.data_save_dir, itr)
+        if self._hp.use_save_thread:
+            self._save_worker.put(('path', verbose_dir))
 
         return reset_state
 
     @property
     def record_path(self):
         if self._is_robot:
-            return self._hyperparams['_bench_save']
+            return self._hp._bench_save
         else:
-            return self._hyperparams['data_save_dir'] + '/record/'
+            return self._hp.data_save_dir + '/record/'

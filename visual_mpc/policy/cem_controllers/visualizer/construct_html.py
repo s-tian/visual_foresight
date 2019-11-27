@@ -89,6 +89,13 @@ def save_img(save_worker, folder, name, img):
     return html_path
 
 
+def save_imgs(save_worker, folder, name, img_array):
+    html_paths = []
+    for i, a in enumerate(img_array):
+        html_path = 'assets/{}_{}.jpg'.format(name, i)
+        save_worker.put(('img', '{}/{}'.format(folder, html_path), a))
+    return html_paths
+
 def save_html(save_worker, path, content):
     save_worker.put(('txt_file', path, content))
 

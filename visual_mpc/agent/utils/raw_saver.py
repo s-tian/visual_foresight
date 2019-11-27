@@ -41,3 +41,5 @@ class RawSaver():
         if policy_outputs is not None:
             with open('{}/policy_out.pkl'.format(traj_folder), 'wb') as file:
                 pkl.dump(policy_outputs, file)
+
+        import pdb; pdb.set_trace()

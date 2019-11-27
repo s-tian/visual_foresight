@@ -82,7 +82,8 @@ class GeneralAgent(object):
             'make_final_gif_pointoverlay':False,
             'gen_xml': (True, 1),  # whether to generate xml, and how often
             'start_goal_confs': None,
-            'use_save_thread':False
+            'use_save_thread':False,
+            'num_load_steps':2
         }
         # add new params to parent params
         parent_params = HParams()
@@ -236,7 +237,7 @@ class GeneralAgent(object):
         # Take the sample.
         t = 0
         done = self._hp.T <= 0
-        initial_env_obs, _ = self.env.reset(self._reset_state)
+        initial_env_obs, self._reset_state = self.env.reset(self._reset_state)
         obs = self._post_process_obs(initial_env_obs, agent_data, True)
         policy.reset()
 
