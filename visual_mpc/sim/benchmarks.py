@@ -6,7 +6,7 @@ from collections import OrderedDict
 from .util.combine_score import write_scores
 
 
-def perform_benchmark(conf=None, iex=-1, gpu_id=None, ngpu=1):
+def run_trajectories(conf=None, iex=-1, gpu_id=None, ngpu=1):
     """
     :param conf:
     :param iex:  if not -1 use only rollout this example
@@ -32,7 +32,7 @@ def perform_benchmark(conf=None, iex=-1, gpu_id=None, ngpu=1):
 
     # sample intial conditions and goalpoints
 
-    sim = Sim(conf, gpu_id=gpu_id, ngpu=ngpu, task_mode='bench')
+    sim = Sim(conf, gpu_id=gpu_id, ngpu=ngpu)
 
     if iex == -1:
         i_traj = conf['start_index']
@@ -43,11 +43,6 @@ def perform_benchmark(conf=None, iex=-1, gpu_id=None, ngpu=1):
         nruns = iex
 
     stats_lists = OrderedDict()
-
-    if 'sourcetags' in conf:  # load data per trajectory
-        if 'VMPC_DATA_DIR' in os.environ:
-            datapath = conf['source_basedirs'][0].partition('pushing_data')[2]
-            conf['source_basedirs'] = [os.environ['VMPC_DATA_DIR'] + datapath]
 
     result_file = log_dir + '/results_{}to{}.txt'.format(conf['start_index'], conf['end_index'])
     final_dist_pkl_file = log_dir + '/scores_{}to{}.pkl'.format(conf['start_index'], conf['end_index'])
@@ -63,27 +58,22 @@ def perform_benchmark(conf=None, iex=-1, gpu_id=None, ngpu=1):
         print('run number ', i_traj)
         print('-------------------------------------------------------------------')
 
-        traj_log_dir= log_dir + '/verbose/traj{0}'.format(i_traj)
-        if not os.path.exists(traj_log_dir):
-            os.makedirs(traj_log_dir)
-
-        sim.agent._hyperparams['record'] = traj_log_dir
-
         agent_data = sim.take_sample(i_traj)
 
-        stats_data = agent_data['stats']
-        stat_arrays = OrderedDict()
-        for key in stats_data.keys():
-            if key not in stats_lists:
-                stats_lists[key] = []
-            stats_lists[key].append(stats_data[key])
-            stat_arrays[key] = np.array(stats_lists[key])
+        if 'stats' in agent_data:
+            stats_data = agent_data['stats']
+            stat_arrays = OrderedDict()
+            for key in stats_data.keys():
+                if key not in stats_lists:
+                    stats_lists[key] = []
+                stats_lists[key].append(stats_data[key])
+                stat_arrays[key] = np.array(stats_lists[key])
+
+            pickle.dump(stat_arrays, open(final_dist_pkl_file, 'wb'))
+            write_scores(conf, result_file, stat_arrays, i_traj)
 
         i_traj +=1 #increment trajectories every step!
 
-        pickle.dump(stat_arrays, open(final_dist_pkl_file, 'wb'))
-        write_scores(conf, result_file, stat_arrays, i_traj)
-
 
 if __name__ == '__main__':
-    perform_benchmark()
+    run_trajectories()

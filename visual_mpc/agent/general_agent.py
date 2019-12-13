@@ -2,6 +2,7 @@
 import pdb
 import copy
 import numpy as np
+import os
 from visual_mpc.policy import get_policy_args
 from visual_mpc.utils.im_utils import resize_store
 from .utils.file_saver import start_file_worker
@@ -98,12 +99,16 @@ class GeneralAgent(object):
             filename: Path to XML file containing the world information.
         """
         env_type, env_params = self._hp.env
-        self.env = env_type(env_params, self._reset_state)
+        self.env = env_type(env_params)
 
         self._hp.adim = self.adim = self.env.adim
         self._hp.sdim = self.sdim = self.env.sdim
         self._hp.ncam = self.ncam = self.env.ncam
         self.num_objects = self.env.num_objects
+
+    def reset_env(self):
+        initial_env_obs, self._reset_state = self.env.reset()
+        return initial_env_obs
 
     def sample(self, policy, i_traj):
         """
@@ -210,7 +215,7 @@ class GeneralAgent(object):
 
         return obs
 
-    def _required_rollout_metadata(self, agent_data, t):
+    def _required_rollout_metadata(self, agent_data, t, traj_ok):
         """
         Adds meta_data into the agent dictionary that is MANDATORY for later parts of pipeline
         :param agent_data: Agent data dictionary
@@ -237,9 +242,14 @@ class GeneralAgent(object):
         # Take the sample.
         t = 0
         done = self._hp.T <= 0
-        initial_env_obs, self._reset_state = self.env.reset(self._reset_state)
+        initial_env_obs = self.reset_env()
         obs = self._post_process_obs(initial_env_obs, agent_data, True)
         policy.reset()
+
+        self.traj_log_dir = self._hp.log_dir + '/verbose/traj{}'.format(i_traj)
+        if not os.path.exists(self.traj_log_dir):
+            os.makedirs(self.traj_log_dir)
+        policy.set_log_dir(self.traj_log_dir)
 
         while not done:
             """
@@ -276,7 +286,8 @@ class GeneralAgent(object):
             print('goal_reached', traj_ok)
 
         agent_data['traj_ok'] = traj_ok
-        self._required_rollout_metadata(agent_data, t)
+
+        self._required_rollout_metadata(agent_data, t, traj_ok)
 
         return agent_data, obs, policy_outputs
 
@@ -289,11 +300,7 @@ class GeneralAgent(object):
                     center = tuple([int(np.round(pnts[i, j])) for j in (1, 0)])
                     cv2.circle(img, center, 4, colors[i], -1)
 
-        file_path = self._hp.log_dir
-        # plt.switch_backend('tkagg')
-        # plt.imshow(self.gif_images_traj[0])
-        # plt.show()
-        npy_to_gif(self.gif_images_traj, file_path + '/verbose/traj{}/video'.format(i_traj)) # todo make extra folders for each run?
+        npy_to_gif(self.gif_images_traj, self.traj_log_dir + '/video'.format(i_traj)) # todo make extra folders for each run?
 
     def _init(self):
         """

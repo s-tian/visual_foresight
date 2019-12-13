@@ -75,7 +75,6 @@ class BaseCartgripperEnv(BaseMujocoEnv):
         self._previous_target_qpos, self._n_joints = None, 3
         self._hp = _hp
 
-        self._read_reset_state = reset_state
         self.low_bound = np.array([-0.5, -0.5, -0.08])
         self.high_bound = np.array([0.5, 0.5, 0.15])
         self._gripper_dim = None
@@ -148,10 +147,10 @@ class BaseCartgripperEnv(BaseMujocoEnv):
         row, col = super().project_point(point, camera)
         return self._frame_height - row, col      # cartgripper cameras are flipped in height dimension
 
-    def qpos_reset(self, qpos, qvel):
-        self._read_reset_state['qpos_all'] = qpos
-        self._read_reset_state['qvel_all'] = qvel
-        return self.reset(self._read_reset_state)
+    # def qpos_reset(self, qpos, qvel):
+    #     reset_state['qpos_all'] = qpos
+    #     self._read_reset_state['qvel_all'] = qvel
+    #     return self.reset(self._read_reset_state)
 
     def _create_pos(self):
         if self.object_object_mindist > 0:
@@ -184,10 +183,6 @@ class BaseCartgripperEnv(BaseMujocoEnv):
 
     def reset(self, reset_state=None):
         super().reset()
-
-        if reset_state is not None:
-            self._read_reset_state = reset_state
-
         write_reset_state = {}
         write_reset_state['reset_xml'] = copy.deepcopy(self._reset_xml)
 
@@ -195,7 +190,7 @@ class BaseCartgripperEnv(BaseMujocoEnv):
         self._last_obs = None
         self._obs_history = []
 
-        if self._read_reset_state is None:
+        if reset_state is None:
             # create random starting poses for objects
             object_pos_l = self._create_pos()
             object_pos = np.concatenate(object_pos_l)
@@ -204,7 +199,7 @@ class BaseCartgripperEnv(BaseMujocoEnv):
             xpos0 = self.get_armpos(object_pos)
             qpos = np.concatenate((xpos0, object_pos.flatten()), 0)
         else:
-            qpos = self._read_reset_state['qpos_all']
+            qpos = reset_state['qpos_all']
 
         sim_state = self.sim.get_state()
         sim_state.qpos[:] = qpos
@@ -238,6 +233,8 @@ class BaseCartgripperEnv(BaseMujocoEnv):
             assert not self.arm_obj_initdist
             xpos0[:2] = np.random.uniform(-.4, .4, 2)
             xpos0[2] = np.random.uniform(-0.08, .14)
+
+            import pdb; pdb.set_trace()
         elif self.arm_obj_initdist:
             d = self.arm_obj_initdist
             alpha = np.random.uniform(-np.pi, np.pi, 1)
@@ -245,7 +242,7 @@ class BaseCartgripperEnv(BaseMujocoEnv):
             xpos0[:2] = object_pos[:2] + delta_pos.squeeze()
             xpos0[2] = np.random.uniform(-0.08, .14)
         else:
-            xpos0 = self._read_reset_state['state']
+            xpos0 = reset_state['state']
         if self.arm_start_lifted:
             xpos0[2] = 0.14
         # xpos0[-1] = low_bound[-1]  # start with gripper open

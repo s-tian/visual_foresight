@@ -99,7 +99,6 @@ class Sim(object):
         :param index:  run a single trajectory with index
         :return:
         """
-        self.policy.reset()
         agent_data, obs_dict, policy_out = self.agent.sample(self.policy, index)
         if self._hp.save_data:
             self.save_data(index, agent_data, obs_dict, policy_out)

@@ -1,3 +1,9 @@
+import imageio as io
+import numpy as np
+import cv2
+
+from visual_mpc.agent.utils.file_saver import _make_parent_if_needed
+
 template = """
 <!DOCTYPE html>
 <html>
@@ -82,6 +88,18 @@ def save_gifs(save_worker, folder, name, gif_array):
         save_worker.put(('mov', '{}/{}'.format(folder, html_path), a))
     return html_paths
 
+def save_gifs_direct(folder, name, gif_array):
+    html_paths = []
+    for i, a in enumerate(gif_array):
+        html_path = 'assets/{}_{}.gif'.format(name, i)
+        abs_html_path = folder + '/' + html_path
+        _make_parent_if_needed(abs_html_path)
+        html_paths.append(html_path)
+
+        writer = io.get_writer(abs_html_path, fps=4)
+        [writer.append_data(f.astype(np.uint8)) for f in a]
+        writer.close()
+    return html_paths
 
 def save_img(save_worker, folder, name, img):
     html_path = 'assets/{}.jpg'.format(name)
@@ -89,16 +107,38 @@ def save_img(save_worker, folder, name, img):
     return html_path
 
 
+def save_img_direct(folder, name, img):
+    html_path = 'assets/{}.jpg'.format(name)
+    abs_html_path =  folder + '/' + html_path
+    _make_parent_if_needed(abs_html_path)
+    cv2.imwrite(abs_html_path, img[:, :, ::-1])
+    return html_path
+
 def save_imgs(save_worker, folder, name, img_array):
     html_paths = []
     for i, a in enumerate(img_array):
         html_path = 'assets/{}_{}.jpg'.format(name, i)
+        html_paths.append(html_path)
         save_worker.put(('img', '{}/{}'.format(folder, html_path), a))
+    return html_paths
+
+def save_imgs_direct(folder, name, img_array):
+    html_paths = []
+    for i, a in enumerate(img_array):
+        html_path = 'assets/{}_{}.jpg'.format(name, i)
+        abs_html_path = folder + '/' + html_path
+        _make_parent_if_needed(abs_html_path)
+        html_paths.append(html_path)
+        cv2.imwrite(abs_html_path, a[:, :, ::-1])
     return html_paths
 
 def save_html(save_worker, path, content):
     save_worker.put(('txt_file', path, content))
 
+def save_html_direct(path, content):
+    with open(path, 'w') as f:
+        f.write(content)
+        f.write('\n')
 
 def img_entry_html(img_path, height=640, caption=""):
     return "<br>\n<br>\n<div>\n  <img src=\"{0}\" height=\"{1}\">\n  <p>{2}</p>\n</div>".format(img_path,

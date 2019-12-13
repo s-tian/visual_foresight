@@ -27,17 +27,28 @@ class BenchmarkAgent(GeneralAgent):
 
     def _setup_world(self, itr):
         old_ncam = self.ncam
+
         self._reset_state = self._load_raw_data(itr)
-        GeneralAgent._setup_world(self, itr)
+        env_type, env_params = self._hp.env
+        self.env = env_type(env_params, self._reset_state)
+
+        self._hp.adim = self.adim = self.env.adim
+        self._hp.sdim = self.sdim = self.env.sdim
+        self._hp.ncam = self.ncam = self.env.ncam
+        self.num_objects = self.env.num_objects
+
         assert old_ncam == self.ncam, """Environment has {} cameras but benchmark has {}. 
                                             Feed correct ncam in agent_params""".format(self.ncam, old_ncam)
 
-    def _required_rollout_metadata(self, agent_data, traj_ok, t, i_traj, i_itr, reset_state):
-        GeneralAgent._required_rollout_metadata(self, agent_data, traj_ok, t, i_traj, i_itr, reset_state)
-        point_target_width = self._hp.get('point_space_width', self._hp['image_width'])
-        ntasks = self._hp.get('ntask', 1)
-        if 'no_goal_def' not in self._hp:
-            agent_data['stats'] = self.env.eval(point_target_width, self._hp.get('_bench_save', None), ntasks)
+    def _required_rollout_metadata(self, agent_data, t, traj_ok):
+        GeneralAgent._required_rollout_metadata(self, agent_data, t, traj_ok)
+
+        agent_data['stats'] = self.env.eval()
+        if self._is_robot:
+            point_target_width = self._hp.get('point_space_width', self._hp['image_width'])
+            ntasks = self._hp.get('ntask', 1)
+            if 'no_goal_def' not in self._hp:
+                agent_data['stats'] = self.env.eval(point_target_width, self._hp.get('_bench_save', None), ntasks)
 
         if not traj_ok and self._is_robot:
             """
@@ -93,8 +104,12 @@ class BenchmarkAgent(GeneralAgent):
 
             return GeneralAgent._init(self)
 
-        self.env.set_goal_obj_pose(self._goal_obj_pose)
+        self.env.set_goal(self._goal_obj_pose, self._goal_arm_pose)
         return GeneralAgent._init(self)
+
+    def reset_env(self):
+        initial_env_obs, _ = self.env.reset(self._reset_state)
+        return initial_env_obs
 
     def _load_raw_data(self, itr):
         """
@@ -134,6 +149,7 @@ class BenchmarkAgent(GeneralAgent):
         reset_state = agent_data['reset_state']
 
         self._goal_obj_pose = obs_dict['object_qpos'][-1]
+        self._goal_arm_pose = obs_dict['qpos'][-1][:2]
 
         verbose_dir = '{}/verbose/traj_{}'.format(self._hp.data_save_dir, itr)
         if self._hp.use_save_thread:

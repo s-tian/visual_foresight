@@ -34,8 +34,9 @@ class BaseMujocoEnv(BaseEnv):
 
         return parent_params
 
-    def set_goal_obj_pose(self, pose):
-        self._goal_obj_pose = pose
+    def set_goal(self, goal_obj_pose, goal_arm_pose):
+        self._goal_obj_pose = goal_obj_pose
+        self._goal_arm_pose = goal_arm_pose
 
     def _reset_eval(self):
         if self._goal_obj_pose is not None:

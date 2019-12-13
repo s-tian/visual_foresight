@@ -1,15 +1,14 @@
 # instructions for running this the first time:
 # pull the docker image from docker hub: run ` docker pull febert/recplan:latest `
-nvidia-docker run  -v $VMPC_EXP/:/workspace/experiments \
-                   -v $VMPC_DATA/:/workspace/data/vmpc_data  \
-                   -v $NAS_CODE/:/workspace/code \
-                   -v /raid/:/raid \
+nvidia-docker run  -v /raid/:/raid \
                    -v /:/parent \
                    -v /nfs:/nfs \
                    --name=${DOCKER_NAME}  \
--e VMPC_EXP=/workspace/experiments \
--e VMPC_DATA=/workspace/data/vmpc_data \
--e RAY_RESULTS=/parent/nfs/kun1/users/febert/data/ray_results \
+-e VMPC_EXP=/nfs/kun1/users/febert/data/vmpc_exp \
+-e VMPC_DATA=/nfs/kun1/users/febert/datavmpc_data \
+-e RECPLAN_DATA_DIR=/nfs/kun1/users/febert/datar/recplan_data \
+-e RECPLAN_EXP_DIR=/nfs/kun1/users/febert/data/recplan_exp \
+-e RAY_RESULTS=/nfs/kun1/users/febert/data/ray_results \
 -e NAS_CODE=/workspace/code \
 -t -d \
 --shm-size 8G \

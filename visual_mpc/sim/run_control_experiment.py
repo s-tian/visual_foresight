@@ -11,9 +11,10 @@ import os
 from visual_mpc.sim.util.combine_score import combine_scores
 import ray
 from visual_mpc.sim.simulator import Sim
+from visual_mpc.sim.benchmarks import run_trajectories
 from visual_mpc.utils.sync import SyncCounter
 
-def bench_worker(conf, iex=-1, ngpu=1):
+def single_traj_worker(conf, iex=-1, ngpu=1):
     print('started process with PID:', os.getpid())
     print('making trajectories {0} to {1}'.format(
         conf['start_index'],
@@ -24,6 +25,15 @@ def bench_worker(conf, iex=-1, ngpu=1):
     np.random.seed(None)
     s = Sim(conf)
     s.run()
+
+
+def bench_worker(conf, iex=-1, ngpu=1):
+    print('started process with PID:', os.getpid())
+    random.seed(None)
+    np.random.seed(None)
+    print('start ind', conf['start_index'])
+    print('end ind', conf['end_index'])
+    run_trajectories(conf, iex, gpu_id=conf['gpu_id'], ngpu=ngpu)
 
 class ControlManager:
     def __init__(self, save_dir_prefix='', args_in=None, hyperparams=None):

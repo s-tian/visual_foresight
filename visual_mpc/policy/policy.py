@@ -80,6 +80,9 @@ class Policy(object):
     def reset(self):
         pass
 
+    def set_log_dir(self, dir):
+        self.traj_log_dir = dir
+
 
 class DummyPolicy(object):
     def __init__(self, ag_params, policyparams, gpu_id, ngpu):

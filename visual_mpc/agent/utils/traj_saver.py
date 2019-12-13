@@ -72,9 +72,13 @@ class GeneralAgentSaver:
         for s in savers:
             if agent_data is not None:
                 for k in agent_data:
+                    if k == 'reset_state':
+                        continue
                     s.add_metadata_entry(k, get_shape(agent_data[k]), get_dtype(agent_data[k]))
             if obs is not None:
                 for k in obs:
+                    if k == 'reset_state':
+                        continue
                     if k == 'images':
                         ncam = obs[k].shape[1]
                         for c in range(ncam):
@@ -111,6 +115,8 @@ class GeneralAgentSaver:
         for t in range(self._T):
             step_dict = {}
             for k in obs:
+                if k == 'reset_state':
+                    continue
                 if k == 'images':
                     ncam = obs[k].shape[1]
                     for c in range(ncam):
