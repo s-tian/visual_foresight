@@ -45,7 +45,7 @@ def write_scores(conf, result_file, stat, i_traj=None):
         f.write('---\n')
         f.write('fraction of traj lifted: {0}\n'.format(np.mean(lifted)))
         f.write('---\n')
-    f.write('standard error of the mean (SEM) {0}\n'.format(np.std(final_dist) / np.sqrt(final_dist.shape[0])))
+    # f.write('standard error of the mean (SEM) {0}\n'.format(np.std(final_dist) / np.sqrt(final_dist.shape[0])))
     f.write('---\n')
     f.write('overall best pos improvement: {0} of traj {1}\n'.format(improvement[sorted_ind[0]], sorted_ind[0]))
     f.write('overall worst pos improvement: {0} of traj {1}\n'.format(improvement[sorted_ind[-1]], sorted_ind[-1]))
