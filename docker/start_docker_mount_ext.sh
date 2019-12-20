@@ -5,7 +5,7 @@ nvidia-docker run  -v /raid/:/raid \
                    -v /nfs:/nfs \
                    --name=${DOCKER_NAME}  \
 -e VMPC_EXP=/nfs/kun1/users/febert/data/vmpc_exp \
--e VMPC_DATA=/nfs/kun1/users/febert/datavmpc_data \
+-e VMPC_DATA=/nfs/kun1/users/febert/data/vmpc_data \
 -e RECPLAN_DATA_DIR=/nfs/kun1/users/febert/datar/recplan_data \
 -e RECPLAN_EXP_DIR=/nfs/kun1/users/febert/data/recplan_exp \
 -e RAY_RESULTS=/nfs/kun1/users/febert/data/ray_results \
