@@ -145,16 +145,18 @@ class BenchmarkAgent(GeneralAgent):
             agent_data = pkl.load(file)
         with open('{}/obs_dict.pkl'.format(traj_folder), 'rb') as file:
             obs_dict.update(pkl.load(file))
-
-        reset_state = agent_data['reset_state']
-
-        self._goal_obj_pose = obs_dict['object_qpos'][-1]
+        reset_state = None 
+        if 'reset_state' in agent_data:
+            reset_state = agent_data['reset_state']
+        self._goal_obj_pose = None
+        if 'object_qpos' in obs_dict:
+            self._goal_obj_pose = obs_dict['object_qpos'][-1]
         self._goal_arm_pose = obs_dict['qpos'][-1][:2]
 
         verbose_dir = '{}/verbose/traj_{}'.format(self._hp.data_save_dir, itr)
         if self._hp.use_save_thread:
             self._save_worker.put(('path', verbose_dir))
-
+        print(f'Loaded reset state: {reset_state}')
         return reset_state
 
     @property

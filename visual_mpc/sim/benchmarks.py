@@ -50,7 +50,6 @@ def run_trajectories(conf=None, iex=-1, gpu_id=None, ngpu=1):
         raise ValueError("the file {} already exists!!".format(result_file))
 
     while i_traj <= nruns:
-
         print('run number ', i_traj)
         print('loading done')
 

@@ -125,8 +125,7 @@ class ControlManager:
     
         if 'master_datadir' in hyperparams['agent']:
             ray.wait([sync_todo_id])
-    
-        self.scores = combine_scores(hyperparams, hyperparams['data_save_dir'])
+        self.scores = combine_scores(hyperparams, hyperparams['log_dir'])
 
     def get_startend_idx(self, args, hyperparams, n_worker):
         if args.nsplit != -1:
