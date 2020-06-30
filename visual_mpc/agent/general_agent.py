@@ -4,6 +4,7 @@ import copy
 import numpy as np
 import os
 from visual_mpc.policy import get_policy_args
+from visual_mpc.policy.remote.remote_policy import RemotePolicy
 from visual_mpc.utils.im_utils import resize_store
 from .utils.file_saver import start_file_worker
 from visual_mpc.utils.im_utils import npy_to_gif
@@ -244,6 +245,7 @@ class GeneralAgent(object):
         # Take the sample.
         t = 0
         done = self._hp.T <= 0
+        
         initial_env_obs = self.reset_env()
         obs = self._post_process_obs(initial_env_obs, agent_data, True)
         policy.reset()
@@ -264,21 +266,24 @@ class GeneralAgent(object):
             Policy returns an object (pi_t) where pi_t['actions'] is an action that can be fed to environment
             Environment steps given action and returns an observation
             """
-            pi_t = policy.act(**get_policy_args(policy, obs, t, i_traj, agent_data))
+            if isinstance(policy, RemotePolicy):
+                pi_t = policy.act(**get_policy_args(policy._hp.policy_type, obs, t, i_traj, agent_data))
+            else:
+                pi_t = policy.act(**get_policy_args(policy, obs, t, i_traj, agent_data))
             policy_outputs.append(pi_t)
 
             if 'done' in pi_t:
                 done = pi_t['done']
             try:
                 obs = self._post_process_obs(self.env.step(pi_t['actions']), agent_data)
-                # obs = self._post_process_obs(self.env.step(copy.deepcopy(pi_t['actions']), stage=stage), agent_data, stage=pi_t['policy_index'])
+                #obs = self._post_process_obs(self.env.step(copy.deepcopy(pi_t['actions']), stage=stage), agent_data, stage=pi_t['policy_index'])
             except Environment_Exception as e:
                 print(e)
                 return {'traj_ok': False}, None, None
 
-
             if (self._hp.T - 1) == t or obs['env_done'][-1]:   # environements can include the tag 'env_done' in the observations to signal that time is over
                 done = True
+
             t += 1
 
         traj_ok = self.env.valid_rollout()

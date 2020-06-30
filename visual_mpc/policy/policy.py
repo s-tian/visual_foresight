@@ -21,6 +21,10 @@ def get_policy_args(policy, obs, t, i_tr, step_data=None):
     policy_signature = signature(policy.act)  # Gets arguments required by policy
     for arg in policy_signature.parameters:  # Fills out arguments according to their keyword
         value = policy_signature.parameters[arg].default
+
+        if arg == 'self': # Since using class to get signature, ignore first param
+            continue
+
         if arg in obs:
             value = obs[arg]
         elif step_data is not None and arg in step_data:
