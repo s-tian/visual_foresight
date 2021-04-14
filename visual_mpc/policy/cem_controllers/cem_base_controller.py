@@ -90,6 +90,7 @@ class CEMBaseController(Policy):
         if self._hp.selection_frac:
             K = max(int(self._hp.selection_frac * self._hp.num_samples), self._hp.minimum_selection)
         actions = self._sampler.sample_initial_actions(self._t, self._hp.num_samples, state[-1])
+
         for itr in range(self._n_iter):
             if self._hp.append_action:
                 act_append = np.tile(np.array(self._hp.append_action)[None, None], [self._hp.num_samples, actions.shape[1], 1])
@@ -102,6 +103,7 @@ class CEMBaseController(Policy):
             assert scores.shape == (actions.shape[0],), "score shape should be (n_actions,)"
 
             self._best_indices = scores.argsort()[:K]
+            
             self._best_actions = actions[self._best_indices]
 
             self.plan_stat['scores_itr{}'.format(itr)] = scores

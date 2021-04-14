@@ -122,10 +122,10 @@ def save_imgs(save_worker, folder, name, img_array):
         save_worker.put(('img', '{}/{}'.format(folder, html_path), a))
     return html_paths
 
-def save_imgs_direct(folder, name, img_array):
+def save_imgs_direct(folder, name, img_array, fmt='jpg'):
     html_paths = []
     for i, a in enumerate(img_array):
-        html_path = 'assets/{}_{}.jpg'.format(name, i)
+        html_path = 'assets/{}_{}.{}'.format(name, i, fmt)
         abs_html_path = folder + '/' + html_path
         _make_parent_if_needed(abs_html_path)
         html_paths.append(html_path)

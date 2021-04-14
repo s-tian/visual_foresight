@@ -2,7 +2,6 @@ import os
 import os.path
 from visual_mpc.agent.utils.utils import timed
 import sys
-from visual_mpc.policy.remote.remote_policy import RemotePolicy
 from visual_mpc.agent.utils.raw_saver import RawSaver
 from visual_mpc.agent.utils.traj_saver import GeneralAgentSaver
 from visual_mpc.agent.utils.hdf5_saver import HDF5Saver
@@ -18,7 +17,8 @@ class Sim(object):
         self.override_defaults(config)
         self._hp.agent['log_dir'] = self._hp.log_dir
         self.agent = self._hp.agent['type'](self._hp.agent)
-        if self._hp.policy['remote']:
+        if 'remote' in self._hp.policy and self._hp.policy['remote']:
+            from visual_mpc.policy.remote.remote_policy import RemotePolicy
             self.policy = RemotePolicy(self.agent._hp.values(), self._hp.remote_params, gpu_id, ngpu)
         else:
             self.policy = self._hp.policy['type'](self.agent._hp.values(), self._hp.policy, gpu_id, ngpu)

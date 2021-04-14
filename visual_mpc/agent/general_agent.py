@@ -208,6 +208,8 @@ class GeneralAgent(object):
             agent_data['desig_pix'] = env_obs['obj_image_locations']
         if self._goal_image is not None:
             agent_data['goal_image'] = self._goal_image
+        if hasattr(self, '_goal_state') and self._goal_state is not None:
+            agent_data['goal_state'] = self._goal_state
         if hasattr(self, '_goal_obj_pose') and self._goal_obj_pose is not None:
             agent_data['goal_obj_pose'] = self._goal_obj_pose.copy()
         if self._demo_images is not None:
