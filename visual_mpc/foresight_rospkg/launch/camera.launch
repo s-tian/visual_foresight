@@ -6,7 +6,7 @@
   	<!-- set camera fps to -->
   	<arg name="set_camera_fps" default="30" />
   	<!-- set buffer queue size of frame capturing to -->
-  	<arg name="buffer_queue_size" default="100" />
+  	<arg name="buffer_queue_size" default="1" />
   	<!-- frames per second to query the camera for -->
   	<arg name="fps" default="30" />
   	<!-- frame_id for the camera -->

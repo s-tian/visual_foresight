@@ -27,5 +27,8 @@ if __name__ == '__main__':
         visualize_str = "true"
 
     for provider, cam_name in zip(args.cam_order, args.topic_names):
+        print "Disabling Autofocus and setting absolute focus to 0"
+        os.system("v4l2-ctl --set-ctrl focus_auto=0")
+        os.system("v4l2-ctl --set-ctrl focus_absolute=0")
         os.system(base_call.format(provider, cam_name, visualize_str))
         time.sleep(5)
