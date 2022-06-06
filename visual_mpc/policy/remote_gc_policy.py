@@ -7,7 +7,7 @@ from visual_mpc.policy.policy import Policy
 class GCRemotePolicy(Policy):
     
     """
-    Uses a goal-conditioned policy conditioned on goal image
+    Uses a remote policy conditioned on goal image
     """
 
     def __init__(self, agentparams, policyparams, gpu_id, ngpu):
@@ -21,6 +21,7 @@ class GCRemotePolicy(Policy):
     def setup_socket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((self._hp.host, self._hp.port))
+        self.socket.setblocking(1) # Set blocking mode to never timeout
         print('Connected to ', self._hp.host, ' port: ', self._hp.port)
 
     def _receive_data_size(self):
@@ -41,7 +42,7 @@ class GCRemotePolicy(Policy):
         array = np.frombuffer(msg, dtype=np.float32).reshape(shape)
         return array
 
-    def _receive_bytes(msg_size):
+    def _receive_bytes(self, msg_size):
         msg = bytes() 
         while msg_size > 0:
             new_part = self.socket.recv(msg_size)
@@ -49,7 +50,7 @@ class GCRemotePolicy(Policy):
             msg += new_part
         return msg
 
-    def _send_string(s):
+    def _send_string(self, s):
         self.socket.sendall(struct.pack("I", len(s)))
         self.socket.sendall(s)
 
@@ -67,6 +68,11 @@ class GCRemotePolicy(Policy):
 
         # Send current state
        	keys = ["images", "state", "t", "goal_image"]
+
+        # Index into camera number 0 since we will assume we have one camera
+        images = images[:, 0]
+        goal_image = goal_image[0, 0]
+
 	self._send_string('SOM')
 	for key in keys:
 	    if key == "images":
@@ -88,6 +94,8 @@ class GCRemotePolicy(Policy):
 	self._send_string('EOM')
 
         # Receive action computed by remote policy
-	action = self._receive_message_np(socket)
+	action = self._receive_message_np()
+        print('taking action', action)
+        action = np.zeros(4)
 	return {'actions': action}
  
