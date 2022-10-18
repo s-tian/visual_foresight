@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python 
 import os
 import argparse
 import imp
@@ -170,7 +170,8 @@ if __name__ == '__main__':
     parser.add_argument('--benchmark', action='store_true', default=False,
                         help='Add flag if this experiment is a benchmark')
     args = parser.parse_args()
-
+    print("Robot name", args.robot_name)
+    print("experiment", args.experiment)
     hyperparams = imp.load_source('hyperparams', args.experiment)
     conf = hyperparams.config
 
@@ -186,6 +187,5 @@ if __name__ == '__main__':
         print("Can't load meta-data!")
         import time
         time.sleep(3.0)           # add annoying warning
-    
     env = RobotEnvironment(args.experiment, args.robot_name, conf, args.resume, args.ngpu, args.gpu_id, args.benchmark, env_data)
     env.run()

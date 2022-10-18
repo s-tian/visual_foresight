@@ -21,7 +21,7 @@ def pix_resize(pix, target_width, original_width):
 class BaseRobotEnv(BaseEnv):
     def __init__(self, env_params):
         self._hp = self._default_hparams()
-        self._hp.start_state = []
+        self._hp["start_state"] = []
         for name, value in env_params.items():
             if name == 'camera_topics':
                 self._hp.camera_topics = value
@@ -104,7 +104,7 @@ class BaseRobotEnv(BaseEnv):
 
         parent_params = BaseEnv._default_hparams(self)
         for k in default_dict.keys():
-            parent_params.add_hparam(k, default_dict[k])
+            parent_params[k] = default_dict[k]
         return parent_params
 
     def _setup_robot(self):

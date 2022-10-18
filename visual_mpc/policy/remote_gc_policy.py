@@ -96,6 +96,7 @@ class GCRemotePolicy(Policy):
         # Receive action computed by remote policy
 	action = self._receive_message_np()
         print('taking action', action)
-        action = np.zeros(4)
+        #action = action[:4]
+        #action = np.zeros(4)
 	return {'actions': action}
  

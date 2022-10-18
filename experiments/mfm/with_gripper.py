@@ -1,7 +1,8 @@
 import numpy as np
 import os
 from visual_mpc.agent.benchmarking_agent import BenchmarkAgent
-from visual_mpc.envs.robot_envs.autograsp_env import AutograspEnv
+#from visual_mpc.envs.robot_envs.autograsp_env import AutograspEnv
+from visual_mpc.envs.robot_envs.vanilla_env import VanillaEnv 
 #from visual_mpc.policy.cem_controllers.pixel_cost_controller import PixelCostController
 from visual_mpc.policy.remote_gc_policy import GCRemotePolicy
 from visual_mpc.envs.robot_envs.util.topic_utils import IMTopic
@@ -20,7 +21,7 @@ env_params = {
 }
 
 agent = {'type' : BenchmarkAgent,
-         'env': (AutograspEnv, env_params),
+         'env': (VanillaEnv, env_params),
          'T': 15,  #number of commands per episodes (issued at control_rate / substeps HZ)
          'image_height': 64,
          'image_width': 64,
@@ -43,16 +44,18 @@ policy = {
     #"model_params_path": "~/models/sawyer_single_view/experiment_state-2019-07-04_18-19-37.json",
     #"model_restore_path": "~/models/sawyer_single_view/checkpoint_110000/model-110000",
     #'host': '10.79.12.180', # viscam2
-    'host': '10.79.12.251', # viscam7
     #'host': '10.79.12.249', # viscam6
+    #'host': '10.79.12.192', # viscam3
     #'host': '10.79.12.193', # viscam4
+    #'host': '10.79.12.251', # viscam7
+    'host': '10.79.12.98', # svl2
     #'host': '10.79.12.101', # svl4
     #'host': '10.79.12.110', # svl13
     #'port': 65433,
 }
 
 config = {
-    "experiment_name": "mfm_test",
+    "experiment_name": "mfm_09_24",
     'traj_per_file':128,
     'save_data': True,
     'save_raw_images' : True,

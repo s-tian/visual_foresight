@@ -37,7 +37,7 @@ class IMTopic:
 
     @property
     def width(self):
-        return self._width
+        return self._width - self._right - self._left
 
     @property
     def top(self):
@@ -61,7 +61,7 @@ class IMTopic:
 
     @property
     def height(self):
-        return self._height
+        return self._height - self._top - self._bot
 
     @property
     def flip(self):

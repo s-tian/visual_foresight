@@ -1,9 +1,24 @@
 """ This file defines the base class for the policy. """
 import abc, six
 from funcsigs import signature, Parameter
-from tensorflow.contrib.training import HParams
+#from tensorflow.contrib.training import HParams
 import numpy as np
 import pdb
+
+class dotdict(dict):
+
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+    
+    def set_hparam(self, key, value):
+        self[key] = value
+
+    def add_hparam(self, key, value):
+        self[key] = value
+
+    def values(self):
+        return self
 
 
 def get_policy_args(policy, obs, t, i_tr, step_data=None):
@@ -63,7 +78,7 @@ class Policy(object):
                 self._hp.set_hparam(name, value)
 
     def _default_hparams(self):
-        return HParams()
+        return dotdict()
 
     @abc.abstractmethod
     def act(self, *args):

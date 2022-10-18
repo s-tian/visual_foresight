@@ -27,7 +27,7 @@ class AutograspEnv(BaseRobotEnv):
 
         parent_params = BaseRobotEnv._default_hparams(self)
         for k in default_dict.keys():
-            parent_params.add_hparam(k, default_dict[k])
+            parent_params[k] = default_dict[k]
         return parent_params
 
     def _next_qpos(self, action):

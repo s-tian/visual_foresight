@@ -1,7 +1,19 @@
 import numpy as np
 import random
-from tensorflow.contrib.training import HParams
+#from tensorflow.contrib.training import HParams
 
+
+class dotdict(dict):
+
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+    
+    def set_hparam(self, key, value):
+        self[key] = value
+
+    def values(self):
+        return self
 
 class BaseEnv:
     def step(self, action):
@@ -23,7 +35,7 @@ class BaseEnv:
         raise NotImplementedError
 
     def _default_hparams(self):
-        return HParams()
+        return dotdict()
     
     def reset(self):
         """
